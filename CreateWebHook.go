@@ -1,0 +1,75 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+)
+
+func CreateWebHook(repoUrl, user_pat string) error {
+	webHookUrl := "https://api.github.com/repos/OWNER/REPO/hooks"
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+	parts := strings.Split(repoUrl, "/")
+	owner := parts[1]
+	repo := strings.ReplaceAll(parts[2], ".git", "")
+
+	webHookUrl = strings.ReplaceAll(webHookUrl, "OWNER", owner)
+	webHookUrl = strings.ReplaceAll(webHookUrl, "REPO", repo)
+
+	fmt.Println(owner)
+	fmt.Println(repo)
+	fmt.Println(webHookUrl)
+
+	requestBody := WebHookRequest{
+		Owner:  owner,
+		Repo:   repo,
+		Name:   "web",
+		Active: true,
+		Events: []string{"push"},
+		Config: Config{
+			URL:         "https://22f7361cd0e3.ngrok-free.app/webhook",
+			ContentType: "json",
+			InsecureSSL: "1",
+		},
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		fmt.Println("Couldn't send request")
+		return err
+	}
+
+	req, err := http.NewRequest("POST", webHookUrl, bytes.NewBuffer(jsonData))
+
+	req.Header.Set("Authorization", "Bearer "+user_pat)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("Made request")
+	// var recivedJson WebHookRequest
+	// if err = json.Unmarshal(); err != nil {
+
+	// }
+	resBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading res body")
+		return err
+	}
+	fmt.Println(string(resBody))
+	return nil
+}
