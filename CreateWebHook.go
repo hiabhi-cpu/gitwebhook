@@ -11,7 +11,7 @@ import (
 )
 
 func CreateWebHook(repoUrl, user_pat string) error {
-	webHookUrl := "https://api.github.com/repos/OWNER/REPO/hooks"
+	createWebHookUrl := "https://api.github.com/repos/OWNER/REPO/hooks"
 
 	client := &http.Client{
 		Timeout: time.Second * 10,
@@ -20,12 +20,12 @@ func CreateWebHook(repoUrl, user_pat string) error {
 	owner := parts[1]
 	repo := strings.ReplaceAll(parts[2], ".git", "")
 
-	webHookUrl = strings.ReplaceAll(webHookUrl, "OWNER", owner)
-	webHookUrl = strings.ReplaceAll(webHookUrl, "REPO", repo)
+	createWebHookUrl = strings.ReplaceAll(createWebHookUrl, "OWNER", owner)
+	createWebHookUrl = strings.ReplaceAll(createWebHookUrl, "REPO", repo)
 
 	fmt.Println(owner)
 	fmt.Println(repo)
-	fmt.Println(webHookUrl)
+	fmt.Println(createWebHookUrl)
 
 	requestBody := WebHookRequest{
 		Owner:  owner,
@@ -46,7 +46,7 @@ func CreateWebHook(repoUrl, user_pat string) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", webHookUrl, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", createWebHookUrl, bytes.NewBuffer(jsonData))
 
 	req.Header.Set("Authorization", "Bearer "+user_pat)
 	req.Header.Set("Accept", "application/vnd.github+json")

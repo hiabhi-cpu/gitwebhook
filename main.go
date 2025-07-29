@@ -16,7 +16,7 @@ func main() {
 	user_PAT := os.Getenv("GIT_PAT")
 	gitRepo := "github.com/hiabhi-cpu/webHookTry"
 	fmt.Println("Hello")
-	err = CreateWebHook(gitRepo, user_PAT)
+	err = GetWebHookConfig(gitRepo, user_PAT, "560494871")
 	if err != nil {
 		panic(err)
 	}
