@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -8,7 +9,7 @@ import (
 	"time"
 )
 
-func GetWebHook(repoUrl, user_pat string) error {
+func GetWebHook(repoUrl, user_pat string) ([]GitJsonReply, error) {
 
 	getWebHookUrl := "https://api.github.com/repos/OWNER/REPO/hooks"
 
@@ -32,16 +33,26 @@ func GetWebHook(repoUrl, user_pat string) error {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
+
+	var gitJsonReply []GitJsonReply
+
+	decoder := json.NewDecoder(resp.Body)
+
+	if err := decoder.Decode(&gitJsonReply); err != nil {
+		fmt.Println("error decoding response body")
+		return nil, err
+	}
 
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading res body")
-		return err
+		return nil, err
 	}
+	fmt.Println("hello abhi")
 	fmt.Println(string(resBody))
 
-	return nil
+	return gitJsonReply, nil
 }

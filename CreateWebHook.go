@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func CreateWebHook(repoUrl, user_pat string) error {
+func CreateWebHook(repoUrl, user_pat, reportUrl string) error {
 	createWebHookUrl := "https://api.github.com/repos/OWNER/REPO/hooks"
 
 	client := &http.Client{
@@ -34,7 +34,7 @@ func CreateWebHook(repoUrl, user_pat string) error {
 		Active: true,
 		Events: []string{"push"},
 		Config: Config{
-			URL:         "https://22f7361cd0e3.ngrok-free.app/webhook",
+			URL:         reportUrl,
 			ContentType: "json",
 			InsecureSSL: "1",
 		},
