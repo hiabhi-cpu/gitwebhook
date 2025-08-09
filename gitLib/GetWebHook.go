@@ -1,6 +1,7 @@
-package main
+package gitlib
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -8,9 +9,9 @@ import (
 	"time"
 )
 
-func GetWebHookConfig(repoUrl, user_pat, HOOK_ID string) error {
+func GetWebHook(repoUrl, user_pat string) ([]GitJsonReply, error) {
 
-	getWebHookConfigUrl := "https://api.github.com/repos/OWNER/REPO/hooks/HOOK_ID"
+	getWebHookUrl := "https://api.github.com/repos/OWNER/REPO/hooks"
 
 	client := &http.Client{
 		Timeout: time.Second * 10,
@@ -19,11 +20,10 @@ func GetWebHookConfig(repoUrl, user_pat, HOOK_ID string) error {
 	owner := parts[1]
 	repo := strings.ReplaceAll(parts[2], ".git", "")
 
-	getWebHookConfigUrl = strings.ReplaceAll(getWebHookConfigUrl, "OWNER", owner)
-	getWebHookConfigUrl = strings.ReplaceAll(getWebHookConfigUrl, "REPO", repo)
-	getWebHookConfigUrl = strings.ReplaceAll(getWebHookConfigUrl, "HOOK_ID", HOOK_ID)
+	getWebHookUrl = strings.ReplaceAll(getWebHookUrl, "OWNER", owner)
+	getWebHookUrl = strings.ReplaceAll(getWebHookUrl, "REPO", repo)
 
-	req, err := http.NewRequest("GET", getWebHookConfigUrl, nil)
+	req, err := http.NewRequest("GET", getWebHookUrl, nil)
 
 	req.Header.Set("Authorization", "Bearer "+user_pat)
 	req.Header.Set("Accept", "application/vnd.github+json")
@@ -33,16 +33,26 @@ func GetWebHookConfig(repoUrl, user_pat, HOOK_ID string) error {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
+
+	var gitJsonReply []GitJsonReply
+
+	decoder := json.NewDecoder(resp.Body)
+
+	if err := decoder.Decode(&gitJsonReply); err != nil {
+		fmt.Println("error decoding response body")
+		return nil, err
+	}
 
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading res body")
-		return err
+		return nil, err
 	}
+	fmt.Println("hello abhi")
 	fmt.Println(string(resBody))
 
-	return nil
+	return gitJsonReply, nil
 }

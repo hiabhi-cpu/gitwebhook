@@ -1,4 +1,4 @@
-package main
+package gitlib
 
 type WebHookRequest struct {
 	Owner  string   `json:"owner"`
