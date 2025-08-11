@@ -2,18 +2,17 @@ package gitlib
 
 import (
 	"fmt"
-	"os"
 	"strings"
 )
 
-func GetOrCreateWebhook(gitRepo, user_PAT string) error {
+func GetOrCreateWebhook(gitRepo, user_PAT, rev_url string) error {
 
 	fmt.Println("Hello")
 	gitJsonReply, err := GetWebHook(gitRepo, user_PAT)
 	if err != nil {
 		return err
 	}
-	rev_url := os.Getenv("REV_URL")
+
 	fmt.Println(len(gitJsonReply))
 	if len(gitJsonReply) == 0 {
 		err = CreateWebHook(gitRepo, user_PAT, rev_url)
