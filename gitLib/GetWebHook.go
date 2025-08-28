@@ -2,6 +2,7 @@ package gitlib
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -37,6 +38,10 @@ func GetWebHook(repoUrl, user_pat string) ([]GitJsonReply, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.Status != "200 OK" {
+		return nil, errors.New(resp.Status)
+	}
+
 	var gitJsonReply []GitJsonReply
 
 	decoder := json.NewDecoder(resp.Body)
@@ -51,7 +56,6 @@ func GetWebHook(repoUrl, user_pat string) ([]GitJsonReply, error) {
 		fmt.Println("Error reading res body")
 		return nil, err
 	}
-	fmt.Println("hello abhi")
 	fmt.Println(string(resBody))
 
 	return gitJsonReply, nil
